@@ -10,3 +10,5 @@
 
 
 刚好项目中遇到了需要监听浏览器动作的需求，迫不得已，就重写一个`history`好了。
+
+文档完善中，[请先参考`history`的文档](https://github.com/ReactTraining/history/tree/master/docs)

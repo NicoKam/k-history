@@ -38,7 +38,9 @@ export interface Location<S extends State = State> extends Path {
   /**
    * history.state
    */
-  state: S;
+  state?: S;
+
+  key?: string;
 }
 
 /**
@@ -49,11 +51,10 @@ export type Listener<S extends State = State> = (location: Location<S>, action: 
 /**
  * 拦截器回调
  */
-export type Blocker<S extends State = State> = (
+export type BlockerListener<S extends State = State> = (
   location: Location<S>,
   action: Action,
 ) => Promise<boolean> | boolean | null | undefined;
-
 
 export type To = string | Path;
 
@@ -139,7 +140,7 @@ export interface History<S extends State = State> {
    *
    * @see https://github.com/ReactTraining/history/tree/master/docs/api-reference.md#history.block
    */
-  block(blocker: Blocker<S>): () => void;
+  block(blocker: BlockerListener<S>): () => void;
 }
 
 /**
