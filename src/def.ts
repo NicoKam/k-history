@@ -52,7 +52,7 @@ export type Listener<S extends State = State> = (location: Location<S>, action: 
  * 拦截器回调
  */
 export type BlockerListener<S extends State = State> = (
-  location: Location<S>,
+  location: number | Location<S>,
   action: Action,
 ) => Promise<boolean> | boolean | null | undefined;
 
