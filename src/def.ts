@@ -56,7 +56,7 @@ export type BlockerListener<S extends State = State> = (
   action: Action,
 ) => Promise<boolean> | boolean | null | undefined;
 
-export type To = string | Path;
+export type To = string | Location;
 
 /**
  * 抽象的history
@@ -112,6 +112,7 @@ export interface History<S extends State = State> {
    * @see https://github.com/ReactTraining/history/tree/master/docs/api-reference.md#history.back
    */
   back(): void;
+  goBack(): void;
 
   /**
    * Navigates to the next entry in the stack. Identical to go(1).
@@ -119,6 +120,7 @@ export interface History<S extends State = State> {
    * @see https://github.com/ReactTraining/history/tree/master/docs/api-reference.md#history.forward
    */
   forward(): void;
+  goForward(): void;
 
   /**
    * Sets up a listener that will be called whenever the current location

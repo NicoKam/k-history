@@ -26,8 +26,12 @@ export default class Blocker {
     }
     for (let i = 0; i < this.listener.length; i++) {
       const cb = this.listener[i];
-      const res = await cb(location, action);
-      if (res === false) return false;
+      try {
+        const res = await cb(location, action);
+        if (res === false) return false;
+      } catch (err) {
+        return false;
+      }
     }
     return true;
   };
