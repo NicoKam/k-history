@@ -304,8 +304,6 @@ export const createHistory = (options: HistoryOptions = {}): History => {
     block,
   };
 
-  window.h = history;
-
   return history;
 };
 
