@@ -56,8 +56,6 @@ export const createHistory = (options: HistoryOptions = {}): History => {
     isInitiative = true;
     initiativeActionType = 'GO';
     await Promise.resolve().then();
-    console.log(delta, realDelta);
-    console.log(getCurrentLocationPath());
     globalHistory.go(realDelta);
     return true;
   };
@@ -129,7 +127,6 @@ export const createHistory = (options: HistoryOptions = {}): History => {
 
   // 当检测到触发跳转
   const handleHistoryChange = () => {
-    console.log('history-change', getCurrentLocationPath().pathname, globalHistory.state);
     if (isRevert) {
       // 检测到当前的变化是 revert 操作，忽略后面的所有动作
       isRevert = false;
@@ -148,7 +145,6 @@ export const createHistory = (options: HistoryOptions = {}): History => {
       return index > globalIndex ? Action.Push : Action.Pop;
     })();
 
-    // console.log('history changed', action, currentPath, currentState);
 
     if (!isInitiative) {
       // 如果是被动触发的跳转（如前进、后退、物理按键返回等），需要判断 blocker 是否需要拦截
@@ -179,7 +175,6 @@ export const createHistory = (options: HistoryOptions = {}): History => {
           revertCallback = () => {
             canGo().then((ok) => {
               if (ok) {
-                console.log('forward');
                 history.go(1);
               }
             });
@@ -215,13 +210,11 @@ export const createHistory = (options: HistoryOptions = {}): History => {
 
     // 触发事件
     const { pathname } = currentPath;
-    console.log(currentPath);
     const finalLocation = {
       ...currentPath,
       pathname: basename ? pathname.replace(new RegExp('^' + basename), '') : pathname,
       state: currentState.state,
     };
-    console.log('finalLocation', finalLocation);
     emitter.emit('historychanged', finalLocation, action);
   };
 
