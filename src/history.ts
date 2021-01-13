@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { EventEmitter } from 'events';
 import { createHref, createKey, getCurrentLocationPath, parsePath } from './utils';
-import { Action, BlockerListener, History, Listener, State, To } from './def';
+import type { BlockerListener, History, Listener, State, To } from './def';
+import { Action } from './def';
 import Blocker from './Blocker';
 
 export const HISTORY_INDEX_NAME = '_historyIndex';
@@ -38,14 +40,14 @@ export const createHistory = (options: HistoryOptions = {}): History => {
 
   const go = async (delta: number) => {
     const globalIndex = getGlobalIndex();
-    let max = historyLength - 1 - globalIndex;
-    let min = -globalIndex;
+    const max = historyLength - 1 - globalIndex;
+    const min = -globalIndex;
     const realDelta = Math.min(max, Math.max(min, delta));
     if (delta !== realDelta) {
       console.warn(`history.go(${delta}) failed because the delta range is [${min}, ${max}]`);
     }
 
-    if (realDelta === 0) return;
+    if (realDelta === 0) return false;
 
     const canLeave = await blocker.canLeave(realDelta, realDelta > 0 ? Action.Push : Action.Pop);
 
@@ -69,9 +71,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
     const nextLocation = parsePath(to, state);
     const url = getHashPrefix() + basename + createHref(to);
 
-    const canLeave = await blocker.canLeave({
-      ...nextLocation,
-    }, Action.Push);
+    const canLeave = await blocker.canLeave({ ...nextLocation }, Action.Push);
 
     // 被拦截
     if (!canLeave) return false;
@@ -100,9 +100,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
     const nextLocation = parsePath(to, state);
     const url = getHashPrefix() + basename + createHref(to);
 
-    const canLeave = await blocker.canLeave({
-      ...nextLocation,
-    }, Action.Push);
+    const canLeave = await blocker.canLeave({ ...nextLocation }, Action.Push);
 
     // 被拦截
     if (!canLeave) return false;
@@ -140,7 +138,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
     const { [HISTORY_INDEX_NAME]: index = globalIndex } = currentState;
 
     // 计算出当前跳转的动作
-    let action = (() => {
+    const action = (() => {
       if (index === globalIndex) return Action.Replace;
       return index > globalIndex ? Action.Push : Action.Pop;
     })();
@@ -212,7 +210,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
     const { pathname } = currentPath;
     const finalLocation = {
       ...currentPath,
-      pathname: basename ? pathname.replace(new RegExp('^' + basename), '') : pathname,
+      pathname: basename ? pathname.replace(new RegExp(`^${basename}`), '') : pathname,
       state: currentState.state,
     };
     emitter.emit('historychanged', finalLocation, action);

@@ -13,6 +13,7 @@ export enum Action {
 export type State = object | null;
 
 export interface Path {
+
   /**
    * 路径名称，剔除了routerBase
    */
@@ -35,6 +36,7 @@ export interface Path {
 }
 
 export interface Location<S extends State = State> extends Path {
+
   /**
    * history.state
    */

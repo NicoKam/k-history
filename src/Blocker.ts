@@ -1,4 +1,4 @@
-import { Action, BlockerListener, Location, State } from './def';
+import type { Action, BlockerListener, Location, State } from './def';
 
 export default class Blocker {
   listener: BlockerListener[] = [];
@@ -6,17 +6,17 @@ export default class Blocker {
   block = (listener: BlockerListener | string) => {
     // 兼容 v4 block('string')
     const l =
-      typeof listener === 'string'
-        ? () => {
+      typeof listener === 'string' ?
+        () => {
           window.alert(listener);
           return false;
-        }
-        : listener;
+        } :
+        listener;
 
     this.listener.push(l);
 
     return () => {
-      this.listener = this.listener.filter((cb) => cb !== l);
+      this.listener = this.listener.filter(cb => cb !== l);
     };
   };
 
@@ -24,7 +24,7 @@ export default class Blocker {
     if (this.listener.length === 0) {
       return true;
     }
-    for (let i = 0; i < this.listener.length; i++) {
+    for(let i = 0; i < this.listener.length; i++) {
       const cb = this.listener[i];
       try {
         const res = await cb(location, action);

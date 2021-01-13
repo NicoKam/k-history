@@ -1,6 +1,6 @@
 import qs from 'qs';
 import URL from 'url';
-import { Location, State, To } from './def';
+import type { Location, State, To } from './def';
 
 export const createHref = (to: To) => {
   if (typeof to === 'string') return to;
@@ -20,17 +20,19 @@ export const createHref = (to: To) => {
 };
 
 export function createKey() {
-  return Math.random().toString(36).substr(2, 8);
+  return Math.random().toString(36)
+    .substr(2, 8);
 }
 
 export const parsePath = (to: To, state?: State): Location => {
   const url = URL.parse(createHref(to));
-  const pathname = url.pathname || '';
-  const search = url.search || '';
-  const hash = url.hash || '';
+  const pathname = url.pathname ?? '';
+  const search = url.search ?? '';
+  const hash = url.hash ?? '';
   return {
     pathname,
-    search, hash,
+    search,
+    hash,
     query: qs.parse(search.replace(/^\?/, '')),
     state: typeof to === 'string' ? state : to.state,
   };
@@ -42,7 +44,5 @@ export const getCurrentLocationPath = (hashRouter: boolean = false): Location =>
   if (hashRouter) {
     return parsePath(hash, state.state);
   }
-  return parsePath({
-    hash, pathname, query: {}, search, state: state.state,
-  });
+  return parsePath({ hash, pathname, query: {}, search, state: state.state });
 };
