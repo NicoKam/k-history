@@ -25,6 +25,7 @@
     "strict": true
   },
   "include": [
+    ".eslintrc.js",
     "src/**/*",
     "typings.d.ts"
   ],
