@@ -4,7 +4,7 @@ import type { Location, State, To } from './def';
 
 export const createHref = (to: To) => {
   if (typeof to === 'string') return to;
-  const { hash, pathname, query = {}, search = '' } = to;
+  const { hash = '', pathname = '', query = {}, search = '' } = to;
 
   const searchObject = qs.parse(search.replace(/^\?/, ''));
 
