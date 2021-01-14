@@ -4,7 +4,7 @@ import type { Location, State, To } from './def';
 
 export const createHref = (to: To) => {
   if (typeof to === 'string') return to;
-  const { hash, pathname, query = {}, search } = to;
+  const { hash, pathname, query = {}, search = '' } = to;
 
   const searchObject = qs.parse(search.replace(/^\?/, ''));
 
@@ -39,7 +39,7 @@ export const parsePath = (to: To, state?: State): Location => {
 };
 
 export const getCurrentLocationPath = (hashRouter: boolean = false): Location => {
-  const { pathname, search, hash } = location;
+  const { pathname, search = '', hash = '' } = location;
   const state = window.history.state || {};
   if (hashRouter) {
     return parsePath(hash, state.state);
