@@ -22,9 +22,8 @@ export const createHistory = (options: HistoryOptions = {}): History => {
 
   const blocker = new Blocker();
 
-
   let globalState = globalHistory.state || {};
-  let globalPath = getCurrentLocationPath();
+  let globalPath = getCurrentLocationPath(hashRouter);
   // 是否用户触发跳转
   let isUserAction = false;
   // 是否主动触发跳转
@@ -34,13 +33,13 @@ export const createHistory = (options: HistoryOptions = {}): History => {
   let isRevert = false;
   let revertCallback: Function = () => undefined;
 
-  let historyLength = (globalState.index || 0) + 1;
+  let historyLength = (globalState[HISTORY_INDEX_NAME] || 0) + 1;
 
   const getGlobalIndex = () => globalState[HISTORY_INDEX_NAME] || 0;
 
   const go = async (delta: number) => {
     const globalIndex = getGlobalIndex();
-    const max = historyLength - 1 - globalIndex;
+    const max = Math.max(0, historyLength - 1 - globalIndex);
     const min = -globalIndex;
     const realDelta = Math.min(max, Math.max(min, delta));
     if (delta !== realDelta) {
@@ -132,7 +131,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
       typeof revertCallback === 'function' && revertCallback();
       return;
     }
-    const currentPath = getCurrentLocationPath();
+    const currentPath = getCurrentLocationPath(hashRouter);
     const currentState = globalHistory.state || {};
     const globalIndex = getGlobalIndex();
     const { [HISTORY_INDEX_NAME]: index = globalIndex } = currentState;
@@ -142,7 +141,6 @@ export const createHistory = (options: HistoryOptions = {}): History => {
       if (index === globalIndex) return Action.Replace;
       return index > globalIndex ? Action.Push : Action.Pop;
     })();
-
 
     if (!isInitiative) {
       // 如果是被动触发的跳转（如前进、后退、物理按键返回等），需要判断 blocker 是否需要拦截
@@ -155,14 +153,15 @@ export const createHistory = (options: HistoryOptions = {}): History => {
           state: currentState.state,
         };
 
-        const canGo = () => blocker.canLeave(nextLocation, action).then((ok) => {
-          if (ok) {
-            isInitiative = true;
-            initiativeActionType = 'GO';
-            isRevert = false;
-          }
-          return ok;
-        });
+        const canGo = () =>
+          blocker.canLeave(nextLocation, action).then((ok) => {
+            if (ok) {
+              isInitiative = true;
+              initiativeActionType = 'GO';
+              isRevert = false;
+            }
+            return ok;
+          });
 
         if (action === Action.Replace) {
           // 如果是 Replace 的，则需要通过 Replace 返回
@@ -173,7 +172,8 @@ export const createHistory = (options: HistoryOptions = {}): History => {
           revertCallback = () => {
             canGo().then((ok) => {
               if (ok) {
-                history.go(1);
+                globalHistory.go(1);
+                // history.go(1);
               }
             });
           };
@@ -182,7 +182,8 @@ export const createHistory = (options: HistoryOptions = {}): History => {
           revertCallback = () => {
             canGo().then((ok) => {
               if (ok) {
-                history.go(-1);
+                globalHistory.go(-1);
+                // history.go(-1);
               }
             });
           };
@@ -197,6 +198,9 @@ export const createHistory = (options: HistoryOptions = {}): History => {
     if (isUserAction && initiativeActionType === Action.Push) {
       historyLength = index + 1;
     }
+
+    // 前进时更新长度
+    historyLength = Math.max(historyLength, index);
 
     // 相应处理结束，更新状态及触发事件
 
@@ -229,7 +233,6 @@ export const createHistory = (options: HistoryOptions = {}): History => {
       }
     };
   };
-
 
   // window.addEventListener(HashChangeEventType, () => {
   //   if(hashRouter){
@@ -298,15 +301,17 @@ export const createHistory = (options: HistoryOptions = {}): History => {
   return history;
 };
 
-export const createBrowserHistory = (options: Omit<HistoryOptions, 'hashRouter'> = {}): History => createHistory({
-  ...options,
-  hashRouter: false,
-});
+export const createBrowserHistory = (options: Omit<HistoryOptions, 'hashRouter'> = {}): History =>
+  createHistory({
+    ...options,
+    hashRouter: false,
+  });
 
-export const createHashHistory = (options: Omit<HistoryOptions, 'hashRouter'> = {}): History => createHistory({
-  ...options,
-  hashRouter: true,
-});
+export const createHashHistory = (options: Omit<HistoryOptions, 'hashRouter'> = {}): History =>
+  createHistory({
+    ...options,
+    hashRouter: true,
+  });
 
 export const createMemoryHistory = () => {
   console.warn('`createMemoryHistory` is not implemented.');

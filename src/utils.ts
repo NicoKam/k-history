@@ -42,7 +42,7 @@ export const getCurrentLocationPath = (hashRouter: boolean = false): Location =>
   const { pathname, search = '', hash = '' } = location;
   const state = window.history.state || {};
   if (hashRouter) {
-    return parsePath(hash, state.state);
+    return parsePath(hash.replace(/^#/, ''), state.state);
   }
   return parsePath({ hash, pathname, query: {}, search, state: state.state });
 };
