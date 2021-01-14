@@ -5,13 +5,7 @@ export default class Blocker {
 
   block = (listener: BlockerListener | string) => {
     // 兼容 v4 block('string')
-    const l =
-      typeof listener === 'string' ?
-        () => {
-          window.alert(listener);
-          return false;
-        } :
-        listener;
+    const l = typeof listener === 'string' ? () => window.confirm(listener) : listener;
 
     this.listener.push(l);
 
