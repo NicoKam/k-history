@@ -67,6 +67,9 @@ export type To = string | Location;
 export interface History<S extends State = State> {
   readonly location: Location<S>;
 
+  readonly action: Action;
+  readonly length: number;
+
   /**
    * 将To对象/字符串，转换为url路径
    */

@@ -33,6 +33,8 @@ export const createHistory = (options: HistoryOptions = {}): History => {
   let isRevert = false;
   let revertCallback: Function = () => undefined;
 
+  let lastAction: Action = Action.Push;
+
   let historyLength = (globalState[HISTORY_INDEX_NAME] || 0) + 1;
 
   const getGlobalIndex = () => globalState[HISTORY_INDEX_NAME] || 0;
@@ -217,6 +219,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
       pathname: basename ? pathname.replace(new RegExp(`^${basename}`), '') : pathname,
       state: currentState.state,
     };
+    lastAction = action;
     emitter.emit('historychanged', finalLocation, action);
   };
 
@@ -259,6 +262,12 @@ export const createHistory = (options: HistoryOptions = {}): History => {
   };
 
   const history: History = {
+    get length() {
+      return historyLength;
+    },
+    get action() {
+      return lastAction;
+    },
     get location() {
       return {
         ...globalPath,
