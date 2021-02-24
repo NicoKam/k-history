@@ -136,7 +136,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
     const currentPath = getCurrentLocationPath(hashRouter);
     const currentState = globalHistory.state || {};
     const globalIndex = getGlobalIndex();
-    const { [HISTORY_INDEX_NAME]: index = globalIndex } = currentState;
+    const { [HISTORY_INDEX_NAME]: index = 0 } = currentState;
 
     // 计算出当前跳转的动作
     const action = (() => {
