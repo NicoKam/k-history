@@ -38,11 +38,40 @@ export const parsePath = (to: To, state?: State): Location => {
   };
 };
 
-export const getCurrentLocationPath = (hashRouter: boolean = false): Location => {
+
+export const concatBasename = (basename: string = '/', pathname: string = '') => {
+  const hasSuffix = basename.endsWith('/');
+  const hasPrefix = pathname.startsWith('/');
+  if (hasSuffix && hasPrefix) {
+    return basename.replace(/\/$/, '') + pathname;
+  }
+  if (!hasPrefix && !hasSuffix) {
+    return `${basename}/${pathname}`;
+  }
+  return basename + pathname;
+};
+
+export const removeBasename = (basename: string = '/', pathname: string = '') => {
+  let p = pathname;
+  if (p.startsWith(basename)) {
+    p = p.replace(new RegExp(`^${basename}`), '');
+  }
+
+  if (!p.startsWith('/')) p = `/${p}`;
+  return p;
+};
+
+
+export type CurrentLocationOptions = {
+  hashRouter?: boolean;
+  basename: string;
+};
+export const getCurrentLocationPath = (options: CurrentLocationOptions): Location => {
+  const { hashRouter = false, basename } = options;
   const { pathname, search = '', hash = '' } = location;
   const state = window.history.state || {};
   if (hashRouter) {
     return parsePath(hash.replace(/^#/, ''), state.state);
   }
-  return parsePath({ hash, pathname, query: {}, search, state: state.state });
+  return parsePath({ hash, pathname: removeBasename(basename, pathname), query: {}, search, state: state.state });
 };

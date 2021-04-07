@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { EventEmitter } from 'events';
-import { createHref, createKey, getCurrentLocationPath, parsePath } from './utils';
+import Blocker from './Blocker';
 import type { BlockerListener, History, Listener, State, To } from './def';
 import { Action } from './def';
-import Blocker from './Blocker';
+import { concatBasename, createHref, createKey, getCurrentLocationPath, parsePath } from './utils';
 
 export const HISTORY_INDEX_NAME = '_historyIndex';
 export const HISTORY_KEY_NAME = 'key';
@@ -23,7 +23,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
   const blocker = new Blocker();
 
   let globalState = globalHistory.state || {};
-  let globalPath = getCurrentLocationPath(hashRouter);
+  let globalPath = getCurrentLocationPath({ hashRouter, basename });
   // 是否用户触发跳转
   let isUserAction = false;
   // 是否主动触发跳转
@@ -31,7 +31,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
   let initiativeActionType: Action | 'GO' | undefined = undefined;
   // 是否还原Location
   let isRevert = false;
-  let revertCallback: Function = () => undefined;
+  let revertCallback: () => void = () => {};
 
   let lastAction: Action = Action.Push;
 
@@ -70,7 +70,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
   const push = async (to: To, state?: State) => {
     const globalIndex = getGlobalIndex();
     const nextLocation = parsePath(to, state);
-    const url = getHashPrefix() + basename + createHref(to);
+    const url = getHashPrefix() + concatBasename(basename, createHref(to));
 
     const canLeave = await blocker.canLeave({ ...nextLocation }, Action.Push);
 
@@ -99,7 +99,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
   const replace = async (to: To, state?: State) => {
     const globalIndex = getGlobalIndex();
     const nextLocation = parsePath(to, state);
-    const url = getHashPrefix() + basename + createHref(to);
+    const url = getHashPrefix() + concatBasename(basename, createHref(to));
 
     const canLeave = await blocker.canLeave({ ...nextLocation }, Action.Push);
 
@@ -133,7 +133,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
       typeof revertCallback === 'function' && revertCallback();
       return;
     }
-    const currentPath = getCurrentLocationPath(hashRouter);
+    const currentPath = getCurrentLocationPath({ hashRouter, basename });
     const currentState = globalHistory.state || {};
     const globalIndex = getGlobalIndex();
     const { [HISTORY_INDEX_NAME]: index = 0 } = currentState;
@@ -216,7 +216,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
     const { pathname } = currentPath;
     const finalLocation = {
       ...currentPath,
-      pathname: basename ? pathname.replace(new RegExp(`^${basename}`), '') : pathname,
+      pathname,
       state: currentState.state,
     };
     lastAction = action;
