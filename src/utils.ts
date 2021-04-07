@@ -38,7 +38,6 @@ export const parsePath = (to: To, state?: State): Location => {
   };
 };
 
-
 export const concatBasename = (basename: string = '/', pathname: string = '') => {
   const hasSuffix = basename.endsWith('/');
   const hasPrefix = pathname.startsWith('/');
@@ -61,7 +60,6 @@ export const removeBasename = (basename: string = '/', pathname: string = '') =>
   return p;
 };
 
-
 export type CurrentLocationOptions = {
   hashRouter?: boolean;
   basename: string;
@@ -71,7 +69,7 @@ export const getCurrentLocationPath = (options: CurrentLocationOptions): Locatio
   const { pathname, search = '', hash = '' } = location;
   const state = window.history.state || {};
   if (hashRouter) {
-    return parsePath(hash.replace(/^#/, ''), state.state);
+    return parsePath(removeBasename(basename, hash.replace(/^#/, '')), state.state);
   }
   return parsePath({ hash, pathname: removeBasename(basename, pathname), query: {}, search, state: state.state });
 };
