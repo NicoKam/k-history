@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { EventEmitter } from 'events';
 import Blocker from './Blocker';
-import type { BlockerListener, History, Listener, State, To } from './def';
-import { Action } from './def';
-import { concatBasename, createHref, createKey, getCurrentLocationPath, parsePath } from './utils';
+import { BlockerListener, History, HistoryOptions, Listener, State, To, Action } from './def';
+
+import { concatBasename, createHref, createKey, getCurrentLocation, parsePath } from './utils';
 
 export const HISTORY_INDEX_NAME = '_historyIndex';
 export const HISTORY_KEY_NAME = 'key';
@@ -11,10 +11,9 @@ export const HISTORY_KEY_NAME = 'key';
 // const HashChangeEventType = 'hashchange';
 const PopStateEventType = 'popstate';
 
-export type HistoryOptions = { window?: Window; basename?: string; hashRouter?: boolean };
 
 export const createHistory = (options: HistoryOptions = {}): History => {
-  const { window = document.defaultView!, basename: _basename = '', hashRouter = false } = options;
+  const { window = document.defaultView!, basename: _basename = '/', hashRouter = false } = options;
   const basename = _basename === '/' ? '' : _basename;
 
   const globalHistory = window.history;
@@ -23,7 +22,7 @@ export const createHistory = (options: HistoryOptions = {}): History => {
   const blocker = new Blocker();
 
   let globalState = globalHistory.state || {};
-  let globalPath = getCurrentLocationPath({ hashRouter, basename });
+  let globalPath = getCurrentLocation(options);
   // 是否用户触发跳转
   let isUserAction = false;
   // 是否主动触发跳转
@@ -130,10 +129,10 @@ export const createHistory = (options: HistoryOptions = {}): History => {
       // 检测到当前的变化是 revert 操作，忽略后面的所有动作
       isRevert = false;
       isInitiative = false;
-      typeof revertCallback === 'function' && revertCallback();
+      if (typeof revertCallback === 'function') revertCallback();
       return;
     }
-    const currentPath = getCurrentLocationPath({ hashRouter, basename });
+    const currentPath = getCurrentLocation({ hashRouter, basename });
     const currentState = globalHistory.state || {};
     const globalIndex = getGlobalIndex();
     const { [HISTORY_INDEX_NAME]: index = 0 } = currentState;

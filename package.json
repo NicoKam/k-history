@@ -30,7 +30,7 @@
     "url": "^0.11.0"
   },
   "devDependencies": {
-    "@ali-whale/eslint-config": "^0.9.0-beta.9",
+    "@orca-fe/eslint-config": "^1.0.2",
     "@types/chokidar": "^2.1.3",
     "@types/cross-spawn": "^6.0.2",
     "@types/events": "^3.0.0",

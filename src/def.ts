@@ -182,3 +182,6 @@ export interface HashHistory<S extends State = State> extends History<S> {}
 export interface MemoryHistory<S extends State = State> extends History<S> {
   index: number;
 }
+
+
+export type HistoryOptions = { window?: Window; basename?: string; hashRouter?: boolean };

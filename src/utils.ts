@@ -1,6 +1,6 @@
 import qs from 'qs';
 import URL from 'url';
-import type { Location, State, To } from './def';
+import type { HistoryOptions, Location, State, To } from './def';
 
 export const createHref = (to: To) => {
   if (typeof to === 'string') return to;
@@ -50,26 +50,80 @@ export const concatBasename = (basename: string = '/', pathname: string = '') =>
   return basename + pathname;
 };
 
-export const removeBasename = (basename: string = '/', pathname: string = '') => {
-  let p = pathname;
-  if (p.startsWith(basename)) {
-    p = p.replace(new RegExp(`^${basename}`), '');
+export const getCurrentLocation = (options: HistoryOptions): Location => {
+  const { hashRouter = false, window: _window = window } = options;
+  let { basename = '/' } = options;
+  if (basename === '') {
+    basename = '/';
+  }
+  const { pathname, search = '', hash = '' } = _window.location;
+  const state = _window.history.state || {};
+
+  function removeBasename(pathname: string = '') {
+    let p = pathname;
+    if (p.startsWith(basename)) {
+      p = p.replace(new RegExp(`^${basename}`), '');
+    }
+
+    // 如果 pathname 不是 / 开头，则补上
+    if (!p.startsWith('/')) p = `/${p}`;
+    return p;
   }
 
-  if (!p.startsWith('/')) p = `/${p}`;
-  return p;
-};
-
-export type CurrentLocationOptions = {
-  hashRouter?: boolean;
-  basename: string;
-};
-export const getCurrentLocationPath = (options: CurrentLocationOptions): Location => {
-  const { hashRouter = false, basename } = options;
-  const { pathname, search = '', hash = '' } = location;
-  const state = window.history.state || {};
   if (hashRouter) {
-    return parsePath(removeBasename(basename, hash.replace(/^#/, '')), state.state);
+    return parsePath(removeBasename(hash.replace(/^#/, '')), state.state);
   }
-  return parsePath({ hash, pathname: removeBasename(basename, pathname), query: {}, search, state: state.state });
+  return parsePath({ hash, pathname: removeBasename(pathname), query: {}, search, state: state.state });
+};
+
+export const toPathAndState = (
+  options: HistoryOptions,
+  _location: To,
+  selfState?: Object,
+): { pathname: string; state: Record<string, unknown> } => {
+  const { hashRouter = false } = options;
+  let { basename = '/' } = options;
+  if (basename === '') {
+    basename = '/';
+  }
+
+  // parse location
+  const location: Location =
+    typeof _location === 'string' ? { pathname: _location, hash: '', query: {}, search: '' } : _location;
+
+  const { state } = location;
+  let { pathname, search = '', query = {}} = location;
+
+  // add basename
+  if (pathname.startsWith('/') && basename.endsWith('/')) {
+    // remove double slash
+    pathname = basename + pathname.slice(1);
+  } else {
+    pathname = basename + pathname;
+  }
+
+  // hash router
+  if (hashRouter) {
+    pathname = `#${pathname}`;
+  }
+
+  // check query is object
+  if (!(query instanceof Object)) query = {};
+
+  // remove ?
+  if (search.startsWith('?')) search = search.slice(1);
+
+  // parse search
+  query = {
+    ...qs.parse(search),
+    ...query,
+  };
+
+  return {
+    pathname,
+    state: {
+      ...selfState,
+      state,
+    },
+  };
 };
